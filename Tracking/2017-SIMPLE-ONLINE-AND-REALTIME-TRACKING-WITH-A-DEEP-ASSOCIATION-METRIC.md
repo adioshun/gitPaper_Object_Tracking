@@ -2,6 +2,8 @@ https://arxiv.org/pdf/1703.07402.pdf
 
 https://github.com/nwojke/deep_sort
 
+https://github.com/abhyantrika/nanonets_object_tracking/
+
 
 
 
@@ -189,8 +191,50 @@ In this case, we use the standard Hungarian algorithm, which is very effective a
 Lucky for us, it is a single line import on sklearn !
 
 
+### 9.3 Where is deep learning in all this?
 
+Well, we have an object detector giving us detections, Kalman filter tracking it and giving us missing tracks, the Hungarian algorithm solving the association problem. So, is deep learning really needed here ?
 
+The answer is Yes. Despite the effectiveness of Kalman filter, it fails in many of the real world scenarios we mentioned above, like occlusions, different view points etc.
+
+So, to improve this, the authors of Deep sort introduced another **distance metric** based on the **appearance** of the object.
+
+#### A. The appearance feature vector
+
+The idea to obtain a vector that can describe all the features of a given image is quite simple.
+- We first build a classifier over our dataset, train it till it achieves a reasonably good accuracy, 
+- and then strip the final classification layer. 
+
+Assuming a classical architecture, we will be left with a dense layer producing a single feature vector, waiting to be classified.
+
+That feature vector becomes our “appearance descriptor” of the object.
+
+![](https://lh4.googleusercontent.com/Zh2ZAIGAFgzyrcZNKLa6jgd6rOur-YVXqkP_vJkyZbOkZc3wcvIKYoO7PDTmD2ncrAHbGKe7u-mdOr7awZHNCeKU5XavVEvycI4-pqgsw0GMzTiwUGE-XxmAC390E3o1dN9UKLnT)
+
+The “Dense 10” layer shown in the above pic will be our appearance feature vector for the given crop. 
+
+Once trained, we just need to pass all the crops of the detected bounding box from the image to this network and obtain the “128 X 1” dimensional feature vector.
+
+Now, the updated distance metric will be :
+
+$$
+D=Lambd_a∗D_k+(1−Lambda)∗D_a
+$$
+
+- Where D_k  is the Mahalanobis distance and 
+- D_a  is the cosine distance between the appearance feature vectors and 
+- Lambda is the weighting factor.
+
+The importance of D_a is so high, that the authors make a claim saying, they were able to achieve state of the art even with Lambda=0, ie only using Da !!
+
+A simple distance metric, combined with a powerful deep learning technique is all it took for deep SORT to be an elegant and one of the most widespread Object trackers.
 
 ## 10. Code Review
+
+https://nanonets.com/blog/object-tracking-deepsort/
+
 ## 11. Conclusion
+
+I hope this blog has helped you gain a comprehensive understanding of the core ideas and components in object tracking and acquainted you with the tools required to build your own custom object detector. 
+
+Get coding and make sure there are no strays in your front yard anymore ever!
