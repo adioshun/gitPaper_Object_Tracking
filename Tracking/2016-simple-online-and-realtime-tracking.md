@@ -16,9 +16,26 @@
 |2018|Wojke|Deep Cosine Metric Learning for Person Re-identification|-|
 
 
+
+
 ---
 
-[Tracking Things in Object Detection Videos](https://lab.moovel.com/blog/tracking-things-in-object-detection-videos#3a-sort--simple-online-and-realtime-tracking)의 정리글 
+# [SORT(SIMPLE ONLINE AND REALTIME TRACKING)](https://jjeamin.github.io/paper/2019/04/25/sort/)
+
+고전적이지만 매우 효율적인 두가지 방법인 Kalman ﬁlter,Hungarian method이 각각 tracking 문제의 움직임 예측과 데이터 연관요소를 처리하는데 사용된다.
+
+이 논문에서 제안한 방법은
+- detection의 주요 구성요소
+- object의 상태를 미래의 frame에게 전달
+- 현재 detection을 기존 object와 연결하고 tracking된 object 상태
+
+
+> 간략한 코드 설명 포함 
+
+
+---
+
+# [Tracking Things in Object Detection Videos](https://lab.moovel.com/blog/tracking-things-in-object-detection-videos#3a-sort--simple-online-and-realtime-tracking)
 
 
 ### 동작 방식 How does it work ?
