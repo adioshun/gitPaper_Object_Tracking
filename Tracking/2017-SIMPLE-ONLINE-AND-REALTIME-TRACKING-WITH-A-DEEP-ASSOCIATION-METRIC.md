@@ -173,8 +173,21 @@ Since they are processed independently, we have no idea on how to associate trac
 
 #### A. The distance metric 
 
+The authors decided to use the **squared Mahalanobis distance** (effective metric when dealing with distributions)  to incorporate the uncertainties from the Kalman filter. 
+
+> 마할라노비스 거리 : '평균과의 거리가 표준편차의 몇 배' 인지 나타내는 값 [[참고]](https://rfriend.tistory.com/199)
+
+
+Thresholding this distance can give us a very good idea on the actual associations. 
+
+This metric is more accurate than say, euclidean distance as we are effectively measuring distance between 2 distributions (remember that everything is distribution under Kalman!)
 
 #### B. The efficient algorithm 
+
+In this case, we use the standard Hungarian algorithm, which is very effective and a simple data association problem. I won’t delve into it’s details. More on this can be found here.
+
+Lucky for us, it is a single line import on sklearn !
+
 
 
 
