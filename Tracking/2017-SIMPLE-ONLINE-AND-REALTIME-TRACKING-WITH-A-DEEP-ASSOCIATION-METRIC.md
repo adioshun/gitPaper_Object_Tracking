@@ -87,8 +87,94 @@ The core idea of a Kalman filter is to use the available detections and previous
 > [Tutorial: Kalman Filter with MATLAB example part1](https://www.youtube.com/watch?v=FkCT_LV9Syk): youtube
 > [Tutorial: The Kalman Filter](http://web.mit.edu/kirtley/kirtley/binlustuff/literature/control/Kalman%20filter.pdf): pdf, 8page
 
+### 7.2 Why kalman works
+
+Kalman filter works best for **linear systems** with **Gaussian processes** involved. 
+
+In our case the tracks hardly leave the linear realm and also, most processes and even noise in fall into the Gaussian realm. So, the problem is suited for the use of Kalman filters.
+
 
 ## 8. Deep Learning based Approaches
+
+### 8.1 Deep Regression Networks (ECCV, 2016) 
+
+> [GOTURN??](https://davheld.github.io/GOTURN/GOTURN.html)
+
+One of the early methods that used deep learning, for **single object tracking**. 
+
+A model is trained on a dataset consisting of videos with labelled target frames. 
+
+The objective of the model is to simply track a given object from the given image crop.
+
+To achieve this, they use a two-frame CNN architecture which uses both the current and the previous frame to accurately regress on to the object.
+
+![](https://lh3.googleusercontent.com/zSyuq3tQrBHsBQdM8hcpwKzulGQkeqvxb6VphdZIrsIRScE0fRIYc1F4sxZ3ikCeZHw0NqRth84dJjypj9A6WNk4kh0Adny-XPpkp0_8xgVys3KUDHEl1j0Qe_eXDK5JKV2FK8NQ)
+
+As shown in the figure, we take the crop from the previous frame based on the predictions and define a “Search region” in the current frame based on that crop. 
+
+Now the network is trained to regress for the object in this search region
+
+The network architecture is **simple with CNN’s followed by Fully connected layers** that directly give us the bounding box coordinates.
+
+### 8.2 ROLO - Recurrent Yolo (ISCAS 2016)
+
+> https://arxiv.org/pdf/1607.05781v1.pdf
+
+An elegant method to track objects using deep learning. 
+
+Slight modifications to **YOLO detector** and attaching a **recurrent LSTM** unit at the end, helps in tracking objects by capturing the spatio-temporal features.
+
+![](https://lh5.googleusercontent.com/fuXhhAjjpola_hnkmWcxcZ_Q4JUWLYgwZObvMqLuSCwttAusb49t9S4Bbr7CP-flq_01v1M8_l_dJ4fOxSXtmlDeSkYEw2ebLEjZG5tpmTVPX35s00oMlhyBRJcAcG_WEPGJZbPu)
+
+As shown above, the architecture is quite simple. 
+- The Detections from YOLO (bounding boxes) are concatenated with the feature vector from a CNN based feature extractor (We can either re-use the YOLO backend or use a specialised feature extractor). 
+- Now, this concatenated feature vector, which represents most of the spatial information related to the current object, along with the information on previous state is passed onto the LSTM cell.
+- The output of the cell, now accounts for both spatial and temporal information. 
+
+This simple trick of using CNN’s for feature extraction and LSTM’s for bounding box predictions gave high improvements to tracking challenges.
+
 ## 9. Deep SORT
+
+The most popular and one of the most widely used, elegant object tracking framework is Deep SORT, an extension to SORT (Simple Real time Tracker). 
+
+We shall go through the concepts introduced in brief and delve into the implementation. 
+
+Let us take a close look at the moving parts in this paper.
+
+### 9.1 The Kalman filter
+
+Our friend from above, Kalman filter is a crucial component in deep SORT. 
+
+Our state contains 8 variables; (u,v,a,h,u’,v’,a’,h’) where 
+- (u,v) are centres of the bounding boxes, 
+- a is the aspect ratio and 
+- h, the height of the image. 
+- The other variables are the respective velocities of the variables.
+
+As we discussed previously, the variables have only absolute position and velocity factors, since we are assuming a simple linear velocity model. 
+
+The Kalman filter helps us factor in the noise in detection and uses prior state in predicting a good fit for bounding boxes.
+
+For each detection, we create a “Track”, that has all the necessary state information. 
+
+It also has a parameter to track and delete tracks that had their last successful detection long back, as those objects would have left the scene.
+
+Also, to eliminate duplicate tracks, there is a minimum number of detections threshold for the first few frames.
+
+### 9.2 The assignment problem
+
+Now that we have the new bounding boxes tracked from the Kalman filter, the next problem lies in associating new detections with the new predictions. 
+
+Since they are processed independently, we have no idea on how to associate track\_i with incoming detection\_k.
+
+[중요 구성요소] To solve this, we need 2 things: 
+- A distance metric to quantify the association and 
+- an efficient algorithm to associate the data.
+
+
+
+
+
+
 ## 10. Code Review
 ## 11. Conclusion
