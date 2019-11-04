@@ -171,7 +171,10 @@ Since they are processed independently, we have no idea on how to associate trac
 - A distance metric to quantify the association and 
 - an efficient algorithm to associate the data.
 
+#### A. The distance metric 
 
+
+#### B. The efficient algorithm 
 
 
 
