@@ -42,6 +42,7 @@
 ## Deep Tracking
 
 * [README](Deep-Tracking/README.md)
+* [2016-GOTURN: Generic Object Tracking Using Regression Networks](Deep-Tracking/2016-2016-GOTURN-Generic-Object-Tracking-Using-Regression-Networks.md)
 * [2018-Fast and Furious: Real Time End-to-End 3D Detection, Tracking and Motion Forecasting with a Single Convolutional Net](Deep-Tracking/2018-fast-and-furious-real-time-end-to-end-3d-detection-tracking-and-motion-forecasting-with-a-single-convolutional-net.md)
 * [2019-Multi Object Tracking and Segmentation](Deep-Tracking/2019-Multi-Object-Tracking-and-Segmentation.md)
 
