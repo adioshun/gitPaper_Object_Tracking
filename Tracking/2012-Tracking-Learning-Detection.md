@@ -1,6 +1,9 @@
+# [Tracking-Learning-Detection](https://ieeexplore.ieee.org/document/6104061)
+
+
 # PN tracker
 
-> [[영상추적#2] TLD - 추적하면서 학습한다](http://darkpgmr.tistory.com/65)
+> 
 
 영국 Surrey 대학의 Zdenek Kalal
 
@@ -33,3 +36,11 @@ PN tracker는 내부적으로 tracker와 detector를 동시에 운용합니다.
 |detector(검출기)|미리 알고있는(학습된) 대상을 입력 영상에서 찾을 수 있는 방법인데, 아무 영상이나 이미지 1장만 주어져도 대상을 찾을 수 있어야 합니다.|
 |-|-|
 |tracker(추적기)|일반적으로 동영상의 인접한 영상 프레임들 사이의 시간적, 공간적, 형태적 유사성을 이용하여 대상을 찾는 기술<br>최근의 추적 정보를 활용하기 때문에 만일 대상의 크기, 형태, 위치 등이 급격히 변할 경우에는 실패할 확률이 매우 높아진다|
+
+
+---
+
+- [객체 검출 시스템 개발을 위한 Tracking-Learning-Detection 알고리즘과 학습알고리즘에 관한 연구](http://ki-it.com/xml/12308/12308.pdf)
+
+- [[영상추적#2] TLD - 추적하면서 학습한다](http://darkpgmr.tistory.com/65)
+
