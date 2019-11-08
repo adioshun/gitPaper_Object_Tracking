@@ -265,10 +265,3 @@ ROS코드로 공개 되어 있다. `The proposed framework has been fully implem
 
 
 
----
-
-
-Online learning for 3D LiDAR-based human detection: Experimental analysis of point cloud clustering and classification methods
-
-
-https://rdcu.be/bODuU
