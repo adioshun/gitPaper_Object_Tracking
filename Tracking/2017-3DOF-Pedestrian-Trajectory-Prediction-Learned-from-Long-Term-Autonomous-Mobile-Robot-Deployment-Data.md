@@ -1,0 +1,1 @@
+# [3DOF Pedestrian Trajectory Prediction Learned from Long-Term Autonomous Mobile Robot Deployment Data](https://arxiv.org/pdf/1710.00126.pdf)
