@@ -12,7 +12,6 @@
 * [2011-Tracking People in 3D Using a Bottom-Up Top-Down Detector ](Tracking/2011-tracking-people-in-3d-using-a-bottom-up-top-down-detector.md)
 * [2010-The probabilistic data association filter\(매거진\)](Tracking/2010-the-probabilistic-data-association-filter.md)
 * [2011-클러터 환경에 강인한 고속/소형의 접근 표적 탐지/추적](Tracking/2011-Robust-Detection-and-Tracking-for-a-High-speed-and-Small-Approaching-Target-in-Clutter.md)
-* [2012-\(중요\) Tracking Learning Detection\(PN Tracker\)](Tracking/2012-Tracking-Learning-Detection.md)
 * [2012-\(추천\) LIDAR-BASED MULTI-OBJECT TRACKING SYSTEM WITH DYNAMIC MODELING](Tracking/2012-lidar-based-multi-object-tracking-system-with-dynamic-modeling.md)
 * [2014-Effective Data Association Algorithms for Multi target Tracking](Tracking/2014-effective-data-association-algorithms-for-multi-target-tracking.md)
 * [2014-Confidence-Based Pedestrian Tracking in Unstructured Environments Using 3D Laser Distance Measurements](Tracking/2014-confidence-based-pedestrian-tracking-in-unstructured-environments-using-3d-laser-distance-measurements.md)
@@ -35,8 +34,6 @@
 * [2017-Tracking The Untrackable Learning to Track Multiple Cues with Long-Term Dependencies](Tracking/2017-Tracking-The-Untrackable.md)
 * [2018-Tracklet-Association-Tracker\(30%\)](Tracking/2018-Tracklet-Association-Tracker.md)
 * [2019-Self-Driving Cars: A Survey](Tracking/2019-self-driving-cars-a-survey.md)
-* [2018-\(LCAS\) Multisensor Online Transfer Learning for 3D LiDAR-based Human Detection with a Mobile Robot](Tracking/2018-Multisensor-Online-Transfer-Learning-for-3D-LiDAR-based-Human-Detection-with-a-Mobile-Robot.md)
-* [2019-\(LCAS\) Online learning for 3D LiDAR-based human detection: Experimental analysis of point cloud clustering and classification methods](Tracking/2019-Online-learning-for-3D-LiDAR-based-human-detection-Experimental-analysis-of-point-cloud-clustering-and-classification-methods.md)
 * [2019-Data Association for Multi-Object Tracking via Deep Neural Networks](Tracking/2019-data-association-for-multi-object-tracking-via-deep-neural-networks.md)
 * [2019-A portable three-dimensional LIDARbased system for long-term and widearea people behavior measurement](Tracking/2019-a-portable-three-dimensional-lidarbased-system-for-long-term-and-widearea-people-behavior-measurement.md)
 * [2019-DeepMOT A Differentiable Framework for Training Multiple Object Trackers \(30%\)](Tracking/2019-DeepMOT-A-Differentiable-Framework-for-Training-Multiple-Object-Trackers.md)
@@ -48,6 +45,13 @@
 * [2016-GOTURN: Generic Object Tracking Using Regression Networks](Deep-Tracking/2016-2016-GOTURN-Generic-Object-Tracking-Using-Regression-Networks.md)
 * [2018-Fast and Furious: Real Time End-to-End 3D Detection, Tracking and Motion Forecasting with a Single Convolutional Net](Deep-Tracking/2018-fast-and-furious-real-time-end-to-end-3d-detection-tracking-and-motion-forecasting-with-a-single-convolutional-net.md)
 * [2019-Multi Object Tracking and Segmentation](Deep-Tracking/2019-Multi-Object-Tracking-and-Segmentation.md)
+
+## Tracking Learning Detection
+* [README](Tracking-Learning-Detection/README.md)
+* [2012-\(중요\) Tracking Learning Detection\(PN Tracker\)](Tracking-Learning-Detection/2012-Tracking-Learning-Detection.md)
+* [2017-\(LCAS\) Online learning for human classification in 3D LiDAR-based tracking](Tracking-Learning-Detection/2017-online-learning-for-human-classification-in-3d-lidar-based-tracking.md)
+* [2018-\(LCAS\) Multisensor Online Transfer Learning for 3D LiDAR-based Human Detection with a Mobile Robot](Tracking-Learning-Detection/2018-Multisensor-Online-Transfer-Learning-for-3D-LiDAR-based-Human-Detection-with-a-Mobile-Robot.md)
+* [2019-\(LCAS\) Online learning for 3D LiDAR-based human detection: Experimental analysis of point cloud clustering and classification methods](Tracking-Learning-Detection/2019-Online-learning-for-3D-LiDAR-based-human-detection-Experimental-analysis-of-point-cloud-clustering-and-classification-methods.md)
 
 ## Joint Detection and Tracking
 
