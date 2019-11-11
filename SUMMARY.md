@@ -29,7 +29,6 @@
 * [2017-High-Speed Tracking-by-Detection Without Using Image Information](Tracking/2017-High-Speed-Tracking-by-Detection-Without-Using-Image-Information.md)
 * [2017-\(추천\) 3D-LIDAR Multi Object Tracking for Autonomous Driving](Tracking/2017-3d-lidar-multi-object-tracking-for-autonomous-driving.md)
 * [2017-\(LCAS\) 3DOF Pedestrian Trajectory Prediction Learned from Long-Term Autonomous Mobile Robot Deployment Data](Tracking/2017-3DOF-Pedestrian-Trajectory-Prediction-Learned-from-Long-Term-Autonomous-Mobile-Robot-Deployment-Data.md)
-* [2017-\(LCAS\) Online learning for human classification in 3D LiDAR-based tracking](Tracking/2017-online-learning-for-human-classification-in-3d-lidar-based-tracking.md)
 * [2017-Multiple Object Tracking-A Literature Review](Tracking/2017-Multiple-Object-Tracking-A-Literature-Review.md)
 * [2017-Tracking The Untrackable Learning to Track Multiple Cues with Long-Term Dependencies](Tracking/2017-Tracking-The-Untrackable.md)
 * [2018-Tracklet-Association-Tracker\(30%\)](Tracking/2018-Tracklet-Association-Tracker.md)
@@ -46,7 +45,8 @@
 * [2018-Fast and Furious: Real Time End-to-End 3D Detection, Tracking and Motion Forecasting with a Single Convolutional Net](Deep-Tracking/2018-fast-and-furious-real-time-end-to-end-3d-detection-tracking-and-motion-forecasting-with-a-single-convolutional-net.md)
 * [2019-Multi Object Tracking and Segmentation](Deep-Tracking/2019-Multi-Object-Tracking-and-Segmentation.md)
 
-## Tracking Learning Detection (Online Learning Using Tracking)
+## Tracking Learning Detection \(Online Learning Using Tracking\)
+
 * [README](Tracking-Learning-Detection/README.md)
 * [2012-\(중요\) Tracking Learning Detection\(PN Tracker\)](Tracking-Learning-Detection/2012-Tracking-Learning-Detection.md)
 * [2017-\(LCAS\) Online learning for human classification in 3D LiDAR-based tracking](Tracking-Learning-Detection/2017-online-learning-for-human-classification-in-3d-lidar-based-tracking.md)
