@@ -1,3 +1,4 @@
+
 # [Online learning for 3D LiDAR-based human detection: experimental analysis of point cloud clustering and classification methods](https://link.springer.com/epdf/10.1007/s10514-019-09883-y?author_access_token=bVLnE4rWjkyUnk8WopA0Lfe4RwlQNchNByi7wbcMAY6zHIY15ykgJsK70R8O7eQrMr2yHIZQSiyxe3OktHw_9R1puJtMefwAs4tGo2L7ytrEzPSDTxHtSdjXNYkRozK46fQM7ZPLOgSknycKxSoIsA%3D%3D)
 
 > https://rdcu.be/bODuU
@@ -118,3 +119,240 @@ The **Euclidean method**, instead, clusters points by calculating the distance b
 최근 추세는 효율적인 **low-annotation** 방식을 사용하는 것이다. 우리의 제안 방식도 이런 추세를 따르고 있다. `To summarize, by looking at the current state-of-the-art, it is clear that an effective low-annotation method would be highly beneficial to detect humans in 3D LiDAR scans. Our work contributes to this need by demonstrating that human detection can be improved by combining tracking and online learning with a mobile robot, even in highly dynamic environments, and that such an approach provides comparable or superior results with respect to previous methods.`
 
 
+## 3 General framework for online learning
+
+![](https://i.imgur.com/hFpqWNB.png)
+
+시스템 구성 `Our system consists of four main components:`
+- a cluster detector for 3D LiDAR point clouds, 
+- a multi-target tracker, 
+- a human classifier and 
+- a training sample generator (see Fig. 2). 
+
+분류기는 최소한의 학습 데이터로 지도기반 학습을 시작한다. 추후 학습데이터는 추가 된다. `The classifier is initialised by supervised learning with a small set of human clusters. The size of this set could be as small as one, since more samples will be added incrementally and used for retraining in future iterations.`
+
+온라인 학습 동작 과정 `The online process works as follows.`
+- At each new iteration, a 3D LiDAR scan (i.e. 3D point cloud) is segmented by the **cluster detector**. 
+- Positions and velocities of the clusters are estimated in real-time by a **multi-target tracking ** system. 
+- These estimates are buffered in trajectory arrays together with their respective cluster observations. 
+- At the same time, the classifier labels each cluster as ‘human’ or ‘non-human’.
+
+샘플 생성기는 clusters, trajectories, labels 정보를 이용한다. 라벨 정보는 두 종류(false positive & false negative)의 에러에 영향을 미친다. 샘플생성기는 두개의 독립적인 EXPERT를 이용하여 이 에러를 보정 한다. EXPERT의 결과물에 따라 샘플생성기는 새 학습 데이터를 생성하여 지속적인 학습이 가능하다. `The sample generator exploits all the information about clusters, trajectories and labels. The latter are typically affected by two types of errors: false positive and false negative. The sample generator tries to correct them by using two independent “experts”, which cross-check the output of the classifier with that of the tracker. Based on the experts’ decisions, the sample generator produces new training data. In particular, the P-expert in Fig. 2 converts false negatives into positive samples, while the N-expert converts false positives into negative samples. When enough new samples have been generated, they are used to retrain the classifier, so the system can learn and improve from previous errors. The process and the experts are explained in detail in Sect. 5.2.`
+- The P-expert converts false negatives into positive samples
+- The N-expert converts false positives into negative samples.
+
+온라인 학습 방식이 기존 TLD방식을 도입 하였지만 몇가지는 다른다. `Although conceptually similar to a previous tracking-learning-detection framework (Kalal et al. 2012), the proposed systems differs in three key aspects,`
+- 차별점 #1 :  namely the independence of the tracker from the classifier, 
+- 차별점 #2 :  the frequency of the training process, 
+- 차별점 #3 : and the implementation of the experts. 
+
+차별점 #1 : 특히, 분류기와 추적기가 독립적으로 동작 할수 있어 더 좋은 분류기로 교체도 가능하다. `In particular, while the performance of the human classifier depends on the reliability of the experts and the tracker, the latter is completely unaffected by the classification performance. This decoupling makes the system modular and potentially applicable to alternative classification methods. `
+
+차별점 #2 : 기존 방식은 매 샘플단위로 재 학습을 하지만, 제안 방식은 배치 방식으로 재 학습을 진행 하여 **언더피팅** 문제를 해결 하였다. `Also, instead of retraining incrementally from single samples (i.e. frame-by-frame training), our system performs a less frequent batch-incremental training (Kalal et al. 2012) (i.e. gathering samples in batches to retrain the classifier after a certain period), collecting new data online as the robot moves in the environment. This feature can effectively prevent under-fitting in online learning. `
+
+차별점 #3 : 구현된 Expert는 동시에 여러 타겟을 처리 할수 있으므로 속도면에서 좋다. `Finally, our implementation of the experts is specifically designed to deal with more than one target simultaneously, and therefore to generate new training samples from multiple detections, speeding up the learning process.`
+
+```
+[Read et al. 2012] Tracking-learning-detection Z Kalal, K Mikolajczyk, J Matas IEEE Transactions on Pattern Analysis and Machine Intelligence, 2012
+```
+
+## 4 Point cloud cluster detection and tracking
+
+제안 시스템에서 두개의 모듈(탐지기/추적기)이 가장 중요 하다. 탐지기는 실시간으로 점군에서 물체를 구분해 낸다. 추적기는 실시간으로 위치/속도를 추론한다. 이때 탐지 물체가 사람/물체 인지는 고려 하지 않는다. `Two key components of the proposed system shown in Fig. 2 are the cluster detector and the multi-target tracker. The former detects, in real-time, clusters of point clouds from 3D LiDAR data. Their positions and velocities are estimated by the tracker, also in real-time, independently of whether the clusters belong to humans or not. Details about the two modules are provided next.`
+
+### 4.1 Point cloud cluster detector
+
+- 높이 정보를 이용하여 바닦제거
+- 근거리/원거리별 다른 군집화 파라미터 사용 
+- 사람보다 크거나 작은 물제 제거 
+
+### 4.2 Multi-target tracker
+
+추적시스템은 UKF + GNN을 이용하여 구현 되었다. `The multi-target tracker is based on an efficient Unscented Kalman Filter (UKF) implementation, using Global Nearest Neighbour (GNN) data association to deal with multiple clusters simultaneously (Bellotto and Hu 2009, 2010).`
+
+2D 상에서 추적이 수행 되며, 3D 정보(높이??)는 고려 되지 않는다. `Human clusters are tracked on a 2D plane, corresponding to a flat floor, estimating horizontal coordinates and velocities with respect to a fixed world frame of reference. In the current implementation, the 3D cluster size is not taken into account,` although it could prove beneficial in more challenging tracking scenarios.
+
+#### prediction step
+The prediction step of the estimation is based on the following constant velocity model (Li and Jilkov 2003):
+
+$$
+\left\{\begin{array}{l}{x_{k}=x_{k-1}+\Delta t \dot{x}_{k-1}} \\ {\dot{x}_{k}=\dot{x}_{k-1}} \\ {y_{k}=y_{k-1}+\Delta t \dot{y}_{k-1}} \\ {\dot{y}_{k}=\dot{y}_{k-1}}\end{array}\right.
+$$
+
+- where x_k and y_k are the Cartesian **coordinates** of the target at time_tk, 
+- xk yk are the respective **velocities**, 
+- andΔt=tk−tk−1.
+ 
+
+The position of a cluster is computed by projecting onto the (x, y) plane its centroid c_j , computed as follows:
+
+$$
+c_{j}=\frac{1}{\left|C_{j}\right|} \sum_{p_{i} \in C_{j}} p_{i}
+$$
+
+####  Update step
+
+The update step of the estimation then uses a 2D polar observation model to represent the position of the cluster:
+
+$$
+\left\{\begin{array}{l}{\theta_{k}=\tan ^{-1}\left(y_{k} / x_{k}\right)} \\ {\gamma_{k}=\sqrt{x_{k}^{2}+y_{k}^{2}}}\end{array}\right.
+$$
+
+where θk and γk are the bearing and the distance, respectively, of the cluster from the sensor. 
+
+Note that noises and coordinate transformations, including those relative to the robot motion, are omitted in the above equations for the sake of simplicity.
+
+The choice of the above models and estimation technique is motivated by the type of sensor used. In particular, the polar observation model better represents the actual functioning of our LiDAR sensor (i.e. the raw measures are range values at regular angular intervals) and its noise properties. 
+
+The **non-linearity** of this model leads therefore to the adoption of the **UKF**, which is known to perform better than a standard EKF (Julier and Uhlmann 2004; Bellotto and Hu 2010). 
+
+>  polar observation model??이 UKF 사용과 관련이 있나?
+
+이전 연구에서 제안 방식이 성능이 좋음을 증명 하였다. `Previous studies (Bellotto and Hu 2010; Linder et al. 2016) showed that our estimation framework is an effective and efficient solution to track multiple people with mobile robots. `
+
+
+추적 시스템에 대한 더 자세한 내용은 아래 논문 참고 `More details about our track management solution (i.e. initialisation, maintenance, deletion) and possible application can be found in Bellotto and Hu (2009, 2010), Dondrup et al. (2015).`
+
+Finally, the covariance matrices Q and R of the noises for the prediction and observation models, respectively, are the following (Li and Jilkov 2003):
+
+$$
+\mathbf{Q}=\left[\begin{array}{cccc}{\frac{\Delta t^{4}}{4} \sigma_{x}^{2} \frac{\Delta t^{3}}{2} \sigma_{x}^{2}} & {0} & {0} \\ {\frac{\Delta t^{3}}{2} \sigma_{x}^{2}} & {\Delta t^{2} \sigma_{x}^{2}} & {0} & {0} \\ {0} & {0} & {\frac{\Delta t^{4}}{4} \sigma_{y}^{2} \frac{\Delta t^{3}}{2} \sigma_{y}^{2}} \\ {0} & {0} & {\frac{\Delta t^{3}}{2} \sigma_{y}^{2} \Delta t^{2} \sigma_{y}^{2}}\end{array}\right] \mathbf{R}=\left[\begin{array}{cc}{\sigma_{\theta}^{2}} & {0} \\ {0} & {\sigma_{\gamma}^{2}}\end{array}\right]
+$$
+
+where the noise standard deviations σx , σ y , σθ and σγ were empirically determined to optimize the human tracking performance of our robot platform.
+
+## 5 Online learning for human classification
+
+클러스터된 물체는 추적기의 결과 정보와 함께 학습 데이터로 재 사용된다. `The point cloud clusters detected in Sect. 4.1 are analysed, in real-time, by a classifier distinguishing between humans and non-humans. Our online learning framework is an iterative process in which the classifier is periodically retrained, online, using old and new cluster detections, which are provided by the sample generator. The latter selects, based on tracking information, a pre-defined number of positive and negative clusters, and uses them to retrain the human classifier. The classification and sample generation processes are explained in detail in the following sub-sections.`
+
+### 5.1 Human classifier
+
+SVM을 이용하여 분류작업을 진행 하였다. 이 방식은 비선형에서도 동작 한다. `A standard Support Vector Machine (SVM) (Cortes and Vapnik 1995) is used for human classification. The SVM method has a solid theoretical foundation in mathematics, which is good at dealing with small data samples and therefore very suitable for our proposed online learning framework. Moreoever, this algorithm is known to work well in non-linear classification problems, and has already been applied successfully for 3D LiDAR-based human detection (Navarro-Serment et al. 2009; Kidono et al. 2011).`
+
+
+학습을 위한 Features는 아래 표와 같다. 여러 연구에서 선별적으로 채택 하였다. `In order to train the SVM, we extract seven different features from each point cloud cluster, which are shown in Table 1. Features ( f 1 , . . . , f 7 ) were proposed by NavarroSerment et al. (2009). However, we discarded the last three because of their heavy computational cost and relatively low classification performance (Kidono et al. 2011), which make them unsuitable for real-time people tracking in large populated environments, and replaced them instead with three different features: f 8 , f 9 and f 10 . The former two, f 8 and f 9 were originally proposed by Kidono et al. (2011). The combination of these two features with ( f 1 , . . . , f 4 ) was shown to successfully characterise both standing and sitting people (Yan et al. 2017).`
+
+![](https://i.imgur.com/kE1c1ql.png)
+
+새 특징인 10은 **slice Distance**로 원거리의 sparse한 점군 처리를 위해 도입 되었다. `Feature f 10 , instead, is a new addition to our system, which aims at coupling the detection distance of the sensor with the 3D shape of humans, especially for long distance classification with a sparse point cloud. This new feature, called “slice distance”, is based on the 10 slices of Kidono et al. (2011) and is computed as follows:`
+
+$$
+f_{10}=\left\{\left\|c_{i}\right\|_{2} | c_{i}=\left(x_{i}, y_{i}, z_{i}\right) \in \mathbb{R}^{3}, i=1, \ldots, 10\right\}
+$$
+
+- where c_i is the centroid of each slice, which can be calculated as in Eq. (5). 
+
+The purpose of the 10 slices was to extract the partial features of humans observed from a long distance, where the spatial resolution of the LiDAR’s point clouds decreases. 
+
+The 3D points in the cluster are divided into 10 blocks, and the length and width of each block are computed as features (see Fig. 6).
+
+![](https://i.imgur.com/LwMneJO.png)
+
+
+The respective feature vector is the following: 
+
+$$  f_{8}=\left\{L_{j}, W_{j} | j=1, \ldots, 10\right\} $$
+
+7.3에서 위 특징을 이용한 성능 평가를 실시 하였다. `In Sect. 7.3 we will show that, by using our feature set, the classifier improves on the state-of-the-art.`
+
+분류기 구현에 대한 정보들 `The full set of features from cluster C_j forms a vector ( f 1 , . . . , f 4 , f 8 , . . . , f 10 ), with 71 dimensions in total. At each iteration of the learning process, a binary SVM is trained to label human and non-human clusters based on these features. The software tool we use is LIBSVM (Chang and Lin 2011), setting the ratio of positive and negative training samples to 1:1, and scaling all the feature values within the interval [−1, 1]. The SVM uses a Gaussian Radial Basis Function kernel (Keerthi and Lin 2003) and outputs probabilities associated to the labels. Currently our software does not support incremental learning, so it stores all the training samples since the beginning and uses all of them to retrain the SVM at each new iteration. The training/retraining time is proportional to the number of samples. For our experimental configuration in Sect. 7, it takes from less than 1 millisecond to a few minutes. However, based on our released source code, one can easily decouple the training process from the online learning (e.g. by using independent threads) as needed, or fine-tune the k-fold cross validation (for finding optimal training parameters) to speed up the training process. Moreover, our framework for online learning allows for the implementation of different classifiers and training algorithms.`
+
+### 5.2 Sample generator
+
+분류기 재 학습을 위해서는 학습샘플이 필요 하다. 이는 샘플 생성기를 통해 수행되며 두개의 독립 모듈로 구성 되어 있다. `The training samples needed to retrain the human classifier are selected from the current cluster detections by the sample generator in Fig. 2. This is based on two independent modules: `
+- a positive (P) expert and 
+- a negative (N) expert. 
+
+At each time step, 
+- P모듈은 사람이 아닌 샘플중에서 잘못 분류된것을 찾아 사람으로 재 샘플링 한다. `the P-expert analyses the current clusters classified as non-humans to identify the potentially incorrect ones (i.e. false negatives). The latter are added to the training set as new positive samples. `
+- N모듈은 사람인 샘플중에서 잘못 분류된것을 찾아 사람이 아님으로 재 샘플링 한다. `Conversely, the N-expert examines the current clusters classified as humans, identifies the wrong ones (i.e. false positives), and adds them to training set as new negative samples. `
+
+이 작업은 충분한 수의 샘플데이터가 수집될떄 까지 반복된 후 재 학습용 데이터로 사용된다. `This process is repeated several times, until a sufficient number of new positive and negative samples have been collected. Then the human classifier is retrained with the augmented training set. `
+
+연구 결과 `In practice,`
+- P모듈은 일반화 성능을 올려 주고 ` the P-expert increases the generality of the classifier,`
+- N모듈은 분별력 성능을 올려 준다. ` while the N-expert increases the discriminability. `
+
+The implementation details are described in Algorithm 1.
+
+![](https://i.imgur.com/SWy1pxW.png)
+
+
+#### P모듈은 어떻게 오판 여부를 판단 하는가? 
+
+P모듈은 추적 경로 정보를 사용한다. 한번 사람이라고 인식되고, 동일한 추적 물체일경우 사람으로 판단 한다. `The P-expert selects new positive samples based on the tracked trajectories of the detected clusters. In particular, clusters classified as non-human, but belonging to a trajectory where at least one cluster was classified as human, will be added to the training set as positive samples.`
+
+The conditions to be satisfied by such new positive samples are as follows:
+
+![](https://i.imgur.com/COKCneC.png)
+
+The values of `K,r^p_{min},v^p_{min} and σ^p_{max}`used in our system were empirically tuned before the experiments. 
+
+The last condition,in particular, is particularly useful to filter out clusters that,even if associated with “human-like” trajectories, have a high level of uncertainty because of sudden movements or the proximity of other clusters (see Fig.7).
+
+![](https://i.imgur.com/pyx8ZcI.png)
+```
+[Fig. 7 ]
+- Example of human-like trajectory samples, including one (redcrossed) filtered out because too uncertain. 
+- The green dashed line is the target’s trajectory, while the blue dashed circles are the position’s uncertainties 
+```
+
+#### N모듈은 어떻게 오판 여부를 판단 하는가? 
+
+N모듈은 사람은 **100% STATIC**하지 않다는 가정을 기반으로 한다.사람이 가만히 서있거나 앉아 있더라도, 사람의 형태나 중앙위치는 조금씩 변한다고 가정한한다. 아래의 조건을 만족하면 오판으로 인정한다. ` The N-expert analyses clusters classified as humans and selects those which are potential false positives, transforming them into new negative samples for future retraining. This selection is based on the assumption that humans are not completely static, as there are always some changes in a cluster’s shape and its centroid position, even if the person is simply standing or sitting. Taking advantage of the 3D LiDAR’s high accuracy, these static clusters (considered as negative samples) can be identified if they satisfy the following conditions:`
+
+
+$$
+r_{k} \leq r_{\max }^{n} \text { and } v_{k} \leq v_{\max }^{n} \text { and } \sigma_{x}^{2}+\sigma_{y}^{2} \leq\left(\sigma_{\max }^{n}\right)^{2}
+$$
+
+The parameters `r^n_{max},v^n_{max}, and σ^n_{max}`were determined empirically for the experiments. 
+
+성능 평가는 7.2에서 수행 되었다. The performance of the P–N experts with respect to the stability of the online learning process is also discussed and evaluated in Sect.7.2.
+
+## 6 System setup and dataset
+
+## 7 Experimental results
+
+### 7.1 Clustering performance
+
+### 7.2 Stability analysis (온라인 학습 을 위해 필요 한듯 !!!!)
+
+A stability analysis of the learning process is possible by considering the variations of false positives α and false negatives β generated by the human classifier (Kalal et al. 2012)
+
+...
+
+we use the following **performance metrics** for the **P–N experts**...
+
+...
+
+### 7.3 Classification performance
+
+In this section we evaluate the performance of the 3D LiDAR based human classifier, 
+- first by analysing the classification results of the SVM trained online and offline, 
+- then by assessing the online trained SVM under uncertainty, 
+- and finally by comparing the results with our new feature set against other state-of-the-art feature combinations.
+
+#### 7.3.1 Online versus offline classification
+
+#### 7.3.2 Online classification under uncertainty
+
+#### 7.3.3 Feature sets comparison
+
+## 8 Conclusions
+
+본 논문은 온라인 학습 및 추적, 분류가 가능한 로봇에 대하여 다루고 있다. `This paper presented an improved online learning framework for human detection in 3D LiDAR scans, including an extensive evaluation of runtime performance, stability, and classification results. The framework relies on a multitarget tracking system with a real-time clustering algorithm and an efficient sample generator. It enables a mobile robot to learn autonomously from the environment what humans look like, which greatly reduces the need for tedious and time-consuming data annotation.`
+
+성능도 좋다. `We showed that our adaptive clustering method is more precise than other state-of-the-art algorithms, while still maintaining a low computational cost suitable for most human tracking applications. The stability of the online learning process has been analysed in detail, and has been guaranteed in practice by the high-precision of our P–N expert modules in providing good training samples. Our experiments showed also that, thanks to an augmented set of efficient features, our human classifier performs better than other state-of-the-art solutions in terms of F-measure (accuracy), but with comparable precision and recall.`
+
+본 연구의 코드는 오픈되었다. 다른 부분에 적용한 사례도 있다. `The whole system is implemented in ROS following a modular design. Both the software and the dataset used in our experiments are publicly available for research purposes. Although currently used for human detection and tracking, `
+- our software could be extended to deal with other moving objects such as cars, bicycles or animals (Sun et al. 2018). 
+- The 3D LiDAR-based cluster detection module could also be replaced by other detectors based on different sensors, such as RGB-D cameras and 2D LiDARs (Yan et al. 2018).
+
+향후 연구 `Future extensions should include `
+- **coupling the human classifier to the multi-target tracker**, so that improving the classification of human clusters also improves people tracking. 
+- Moreover, although our solution enables human detection with mobile robots in dynamic environments, in the current paper it has been tested only on datasets recorded for relatively **short period** of times. Daily routines in public environments could be exploited by a service robot, for example, to collect negative background samples at night, when there are no moving objects, and positive human samples during the day.9 
+
+최근 연구 트랜드 : Long-term operation and open-ended learning are therefore two promising directions for future research in this area (Vintr et al. 2019; Krajnik et al. 2017). 
+
+향후 딥러닝을 위한 온라인 학습법에 대한 연구를 진행 중인다. `Future work should look at other classification methods such as deep neural networks, exploiting online learning to overcome the difficulty of collecting extensive training samples.`
